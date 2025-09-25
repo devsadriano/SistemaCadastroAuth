@@ -40,7 +40,12 @@
     </div>
 
     <!-- Login Form -->
-    <form v-if="activeTab === 'login'" @submit.prevent class="space-y-6">
+    <form v-if="activeTab === 'login'" @submit.prevent="handleLogin" class="space-y-6">
+      <!-- Error Message -->
+      <div v-if="error" class="bg-error-50 border border-error-200 text-error-800 px-4 py-3 rounded-lg text-sm">
+        {{ error }}
+      </div>
+
       <!-- Email -->
       <BaseInput
         v-model="loginForm.email"
@@ -48,6 +53,7 @@
         label="E-mail"
         placeholder="Digite seu e-mail"
         required
+        :disabled="loading"
       >
         <template #iconLeft>
           <EnvelopeIcon class="w-5 h-5" />
@@ -61,6 +67,7 @@
         label="Senha"
         placeholder="Digite sua senha"
         required
+        :disabled="loading"
       >
         <template #iconLeft>
           <LockClosedIcon class="w-5 h-5" />
@@ -69,7 +76,8 @@
           <button
             type="button"
             @click="toggleLoginPassword"
-            class="focus:outline-none hover:text-primary-500 transition-colors duration-200"
+            :disabled="loading"
+            class="focus:outline-none hover:text-primary-500 transition-colors duration-200 disabled:opacity-50"
           >
             <EyeIcon v-if="showLoginPassword" class="w-5 h-5" />
             <EyeSlashIcon v-else class="w-5 h-5" />
@@ -90,12 +98,14 @@
         variant="primary"
         size="lg"
         full-width
+        :loading="loading"
+        :disabled="loading"
         class="mt-8"
       >
         <template #icon-left>
           <ArrowRightOnRectangleIcon class="w-5 h-5" />
         </template>
-        Entrar na conta
+        {{ loading ? 'Entrando...' : 'Entrar na conta' }}
       </BaseButton>
     </form>
 
@@ -206,6 +216,9 @@ import {
 import BaseInput from '~/components/BaseInput.vue'
 import BaseButton from '~/components/BaseButton.vue'
 
+// Composable de autenticação
+const { login, loading, error, clearError } = useAuth()
+
 // Estado das abas
 const activeTab = ref('login')
 
@@ -239,6 +252,21 @@ const toggleConfirmPassword = () => {
   showConfirmPassword.value = !showConfirmPassword.value
 }
 
+// Função de login
+const handleLogin = async () => {
+  clearError()
+  
+  const result = await login({
+    email: loginForm.value.email,
+    password: loginForm.value.password
+  })
+
+  if (result.success) {
+    // Login bem-sucedido, o usuário será redirecionado pelo composable
+    console.log('Login realizado com sucesso!')
+  }
+}
+
 // Validação de confirmação de senha
 const confirmPasswordError = computed(() => {
   if (!registerForm.value.confirmPassword) return ''
@@ -248,13 +276,14 @@ const confirmPasswordError = computed(() => {
   return ''
 })
 
-// Limpar formulários ao trocar de aba
+// Limpar formulários e erro ao trocar de aba
 watch(activeTab, () => {
   loginForm.value = { email: '', password: '' }
   registerForm.value = { email: '', password: '', confirmPassword: '' }
   showLoginPassword.value = false
   showRegisterPassword.value = false
   showConfirmPassword.value = false
+  clearError()
 })
 </script>
 
