@@ -110,7 +110,17 @@
     </form>
 
     <!-- Register Form -->
-    <form v-if="activeTab === 'register'" @submit.prevent class="space-y-6">
+    <form v-if="activeTab === 'register'" @submit.prevent="handleRegister" class="space-y-6">
+      <!-- Success Message -->
+      <div v-if="successMessage" class="bg-success-50 border border-success-200 text-success-800 px-4 py-3 rounded-lg text-sm">
+        {{ successMessage }}
+      </div>
+
+      <!-- Error Message -->
+      <div v-if="error" class="bg-error-50 border border-error-200 text-error-800 px-4 py-3 rounded-lg text-sm">
+        {{ error }}
+      </div>
+
       <!-- Email -->
       <BaseInput
         v-model="registerForm.email"
@@ -118,6 +128,7 @@
         label="E-mail"
         placeholder="Digite seu e-mail"
         required
+        :disabled="loading"
       >
         <template #iconLeft>
           <EnvelopeIcon class="w-5 h-5" />
@@ -131,6 +142,7 @@
         label="Senha"
         placeholder="Digite uma senha segura"
         required
+        :disabled="loading"
       >
         <template #iconLeft>
           <LockClosedIcon class="w-5 h-5" />
@@ -139,7 +151,8 @@
           <button
             type="button"
             @click="toggleRegisterPassword"
-            class="focus:outline-none hover:text-primary-500 transition-colors duration-200"
+            :disabled="loading"
+            class="focus:outline-none hover:text-primary-500 transition-colors duration-200 disabled:opacity-50"
           >
             <EyeIcon v-if="showRegisterPassword" class="w-5 h-5" />
             <EyeSlashIcon v-else class="w-5 h-5" />
@@ -155,6 +168,7 @@
         placeholder="Digite a senha novamente"
         :error-message="confirmPasswordError"
         required
+        :disabled="loading"
       >
         <template #iconLeft>
           <LockClosedIcon class="w-5 h-5" />
@@ -163,7 +177,8 @@
           <button
             type="button"
             @click="toggleConfirmPassword"
-            class="focus:outline-none hover:text-primary-500 transition-colors duration-200"
+            :disabled="loading"
+            class="focus:outline-none hover:text-primary-500 transition-colors duration-200 disabled:opacity-50"
           >
             <EyeIcon v-if="showConfirmPassword" class="w-5 h-5" />
             <EyeSlashIcon v-else class="w-5 h-5" />
@@ -177,12 +192,14 @@
         variant="primary"
         size="lg"
         full-width
+        :loading="loading"
+        :disabled="loading"
         class="mt-8"
       >
         <template #icon-left>
           <UserPlusIcon class="w-5 h-5" />
         </template>
-        Criar conta
+        {{ loading ? 'Criando conta...' : 'Criar conta' }}
       </BaseButton>
     </form>
 
@@ -217,10 +234,13 @@ import BaseInput from '~/components/BaseInput.vue'
 import BaseButton from '~/components/BaseButton.vue'
 
 // Composable de autenticação
-const { login, loading, error, clearError } = useAuth()
+const { login, register, loading, error, clearError } = useAuth()
 
 // Estado das abas
 const activeTab = ref('login')
+
+// Estado de mensagem de sucesso
+const successMessage = ref('')
 
 // Estados dos formulários
 const loginForm = ref({
@@ -267,6 +287,30 @@ const handleLogin = async () => {
   }
 }
 
+// Função de registro
+const handleRegister = async () => {
+  clearError()
+  successMessage.value = ''
+  
+  const result = await register({
+    email: registerForm.value.email,
+    password: registerForm.value.password,
+    confirmPassword: registerForm.value.confirmPassword
+  })
+
+  if (result.success) {
+    console.log('Registro realizado com sucesso!')
+    // Se for uma mensagem de confirmação de e-mail
+    if (result.error) {
+      successMessage.value = result.error
+      // Limpar formulário
+      registerForm.value = { email: '', password: '', confirmPassword: '' }
+      showRegisterPassword.value = false
+      showConfirmPassword.value = false
+    }
+  }
+}
+
 // Validação de confirmação de senha
 const confirmPasswordError = computed(() => {
   if (!registerForm.value.confirmPassword) return ''
@@ -283,6 +327,7 @@ watch(activeTab, () => {
   showLoginPassword.value = false
   showRegisterPassword.value = false
   showConfirmPassword.value = false
+  successMessage.value = ''
   clearError()
 })
 </script>

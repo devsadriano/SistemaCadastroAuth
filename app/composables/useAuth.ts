@@ -116,6 +116,103 @@ export const useAuth = () => {
     }
   }
 
+  // Função de registro
+  const register = async (credentials: LoginCredentials & { confirmPassword: string }): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setLoading(true)
+      clearError()
+
+      // Validações básicas
+      if (!credentials.email || !credentials.password || !credentials.confirmPassword) {
+        const errorMsg = 'Todos os campos são obrigatórios'
+        setError(errorMsg)
+        return { success: false, error: errorMsg }
+      }
+
+      // Validar formato do e-mail
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(credentials.email)) {
+        const errorMsg = 'Formato de e-mail inválido'
+        setError(errorMsg)
+        return { success: false, error: errorMsg }
+      }
+
+      // Validar confirmação de senha
+      if (credentials.password !== credentials.confirmPassword) {
+        const errorMsg = 'As senhas não coincidem'
+        setError(errorMsg)
+        return { success: false, error: errorMsg }
+      }
+
+      // Validar força da senha
+      if (credentials.password.length < 6) {
+        const errorMsg = 'A senha deve ter pelo menos 6 caracteres'
+        setError(errorMsg)
+        return { success: false, error: errorMsg }
+      }
+
+      // Fazer registro com Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: credentials.email,
+        password: credentials.password,
+      })
+
+      if (error) {
+        let errorMessage = 'Erro ao criar conta'
+        
+        // Personalizar mensagens de erro
+        switch (error.message) {
+          case 'User already registered':
+            errorMessage = 'Este e-mail já está cadastrado'
+            break
+          case 'Password should be at least 6 characters':
+            errorMessage = 'A senha deve ter pelo menos 6 caracteres'
+            break
+          case 'Invalid email':
+            errorMessage = 'E-mail inválido'
+            break
+          case 'Signup is disabled':
+            errorMessage = 'Cadastro de novos usuários está desabilitado'
+            break
+          default:
+            errorMessage = error.message
+        }
+        
+        setError(errorMessage)
+        return { success: false, error: errorMessage }
+      }
+
+      if (data.user) {
+        // Se o usuário foi criado com sucesso
+        if (data.session) {
+          // Se já está logado (confirmação automática)
+          authState.value.user = data.user
+          authState.value.session = data.session
+          await router.push('/')
+        } else {
+          // Se precisa confirmar e-mail
+          setError(null) // Limpar erro anterior
+          return { 
+            success: true, 
+            error: 'Conta criada! Verifique seu e-mail para confirmar o cadastro.'
+          }
+        }
+        
+        return { success: true }
+      }
+
+      return { success: false, error: 'Erro desconhecido ao criar conta' }
+
+    } catch (err: any) {
+      const errorMessage = err.message || 'Erro interno do servidor'
+      setError(errorMessage)
+      return { success: false, error: errorMessage }
+      
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Função de logout
   const logout = async (): Promise<void> => {
     try {
@@ -205,6 +302,7 @@ export const useAuth = () => {
     
     // Ações
     login,
+    register,
     logout,
     checkAuth,
     initAuthListener,
