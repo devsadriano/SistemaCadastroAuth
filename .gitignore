@@ -22,3 +22,22 @@ logs
 .env
 .env.*
 !.env.example
+
+# IDE and Editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Temporary files
+*.tmp
+*.temp
