@@ -32,18 +32,46 @@
 
         <!-- Action Buttons -->
         <div class="hidden md:flex items-center space-x-4">
-          <BaseButton variant="ghost" size="sm">
-            <template #icon-left>
-              <UserIcon class="w-4 h-4" />
-            </template>
-            Entrar
-          </BaseButton>
-          <BaseButton variant="primary" size="sm">
-            <template #icon-left>
-              <UserPlusIcon class="w-4 h-4" />
-            </template>
-            Cadastrar
-          </BaseButton>
+          <!-- Botões quando não logado -->
+          <template v-if="!isAuthenticated">
+            <BaseButton variant="ghost" size="sm" @click="$router.push('/login')">
+              <template #icon-left>
+                <UserIcon class="w-4 h-4" />
+              </template>
+              Entrar
+            </BaseButton>
+            <BaseButton variant="primary" size="sm" @click="$router.push('/login')">
+              <template #icon-left>
+                <UserPlusIcon class="w-4 h-4" />
+              </template>
+              Cadastrar
+            </BaseButton>
+          </template>
+          
+          <!-- Botões quando logado -->
+          <template v-else>
+            <div class="flex items-center space-x-3">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                  <UserIcon class="w-4 h-4 text-primary-600" />
+                </div>
+                <span class="text-text-secondary text-sm">
+                  Olá, <span class="font-medium text-text-primary">{{ user?.email?.split('@')[0] || 'Usuário' }}</span>!
+                </span>
+              </div>
+              <BaseButton 
+                variant="outline" 
+                size="sm" 
+                @click="handleLogout"
+                :loading="loading"
+              >
+                <template #icon-left>
+                  <ArrowLeftOnRectangleIcon class="w-4 h-4" />
+                </template>
+                {{ loading ? 'Saindo...' : 'Sair' }}
+              </BaseButton>
+            </div>
+          </template>
         </div>
 
         <!-- Mobile menu button -->
@@ -79,18 +107,46 @@
           </NuxtLink>
         </div>
         <div class="mt-4 pt-4 border-t border-borderColor-surface space-y-2">
-          <BaseButton variant="ghost" size="sm" full-width>
-            <template #icon-left>
-              <UserIcon class="w-4 h-4" />
-            </template>
-            Entrar
-          </BaseButton>
-          <BaseButton variant="primary" size="sm" full-width>
-            <template #icon-left>
-              <UserPlusIcon class="w-4 h-4" />
-            </template>
-            Cadastrar
-          </BaseButton>
+          <!-- Botões quando não logado -->
+          <template v-if="!isAuthenticated">
+            <BaseButton variant="ghost" size="sm" full-width @click="handleMobileLogin">
+              <template #icon-left>
+                <UserIcon class="w-4 h-4" />
+              </template>
+              Entrar
+            </BaseButton>
+            <BaseButton variant="primary" size="sm" full-width @click="handleMobileLogin">
+              <template #icon-left>
+                <UserPlusIcon class="w-4 h-4" />
+              </template>
+              Cadastrar
+            </BaseButton>
+          </template>
+          
+          <!-- Botões quando logado -->
+          <template v-else>
+            <div class="flex items-center justify-center space-x-2 px-3 py-2">
+              <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                <UserIcon class="w-4 h-4 text-primary-600" />
+              </div>
+              <div class="text-center">
+                <div class="text-text-secondary text-sm">Olá,</div>
+                <div class="font-medium text-text-primary text-sm">{{ user?.email?.split('@')[0] || 'Usuário' }}!</div>
+              </div>
+            </div>
+            <BaseButton 
+              variant="outline" 
+              size="sm" 
+              full-width 
+              @click="handleLogout"
+              :loading="loading"
+            >
+              <template #icon-left>
+                <ArrowLeftOnRectangleIcon class="w-4 h-4" />
+              </template>
+              {{ loading ? 'Saindo...' : 'Sair da Conta' }}
+            </BaseButton>
+          </template>
         </div>
       </div>
     </nav>
@@ -99,10 +155,14 @@
 
 <script setup>
 // Imports explícitos dos ícones
-import { UserIcon, UserPlusIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { UserIcon, UserPlusIcon, Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon } from '@heroicons/vue/24/outline'
 
 // Imports explícitos dos componentes
 import BaseButton from '~/components/BaseButton.vue'
+
+// Composable de autenticação
+const { isAuthenticated, user, logout, loading } = useAuth()
+const router = useRouter()
 
 // Estado do menu mobile
 const isMobileMenuOpen = ref(false)
@@ -114,6 +174,18 @@ const toggleMobileMenu = () => {
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
+}
+
+// Função de logout
+const handleLogout = async () => {
+  await logout()
+  closeMobileMenu()
+}
+
+// Função para ir para login no mobile
+const handleMobileLogin = () => {
+  router.push('/login')
+  closeMobileMenu()
 }
 
 // Fechar menu mobile ao redimensionar tela

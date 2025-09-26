@@ -10,7 +10,9 @@
     <div class="relative">
       <!-- Icon Left -->
       <div v-if="$slots.iconLeft" class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <slot name="iconLeft" :class="iconClasses" />
+        <div :class="['icon-container', iconClasses]">
+          <slot name="iconLeft" />
+        </div>
       </div>
 
       <!-- Input -->
@@ -38,7 +40,9 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </div>
-        <slot v-else name="iconRight" :class="iconClasses" />
+        <div v-else :class="['icon-container', iconClasses]">
+          <slot name="iconRight" />
+        </div>
       </div>
     </div>
 
@@ -179,9 +183,9 @@ const inputClasses = computed(() => [
 const iconClasses = computed(() => [
   'w-5 h-5 transition-colors duration-200',
   {
-    'text-text-muted': !isFocused.value && !props.errorMessage,
-    'text-primary-500': isFocused.value && !props.errorMessage,
-    'text-error-500': props.errorMessage,
+    'text-slate-500': !isFocused.value && !props.errorMessage,
+    'text-orange-500': isFocused.value && !props.errorMessage,
+    'text-red-500': props.errorMessage,
   }
 ])
 
@@ -198,6 +202,27 @@ const helperClasses = computed(() => [
 /* Animações e transições customizadas */
 input:focus {
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* Garantir visibilidade dos ícones com !important */
+:deep(svg) {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  color: inherit !important;
+  fill: currentColor !important;
+}
+
+/* Forçar visibilidade dos ícones */
+.icon-container {
+  color: #64748B !important; /* slate-500 */
+}
+
+.icon-container.text-orange-500 {
+  color: #F97316 !important; /* orange-500 */
+}
+
+.icon-container.text-red-500 {
+  color: #EF4444 !important; /* red-500 */
 }
 
 input[type="number"]::-webkit-outer-spin-button,

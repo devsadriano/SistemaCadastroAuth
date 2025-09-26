@@ -33,7 +33,7 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-wrap gap-4 justify-center">
+      <div class="flex flex-wrap gap-4 justify-center mb-8">
         <BaseButton
           variant="primary"
           size="lg"
@@ -57,12 +57,19 @@
           {{ loading ? 'Saindo...' : 'Sair da Conta' }}
         </BaseButton>
       </div>
+
+      <!-- Tabela de Funcionários -->
+      <FuncionariosTable @ver-detalhes="handleVerDetalhesFuncionario" />
     </div>
   </div>
 </template>
 
 <script setup>
 import { UserPlusIcon, ArrowLeftOnRectangleIcon } from '@heroicons/vue/24/outline'
+
+// Imports explícitos dos componentes
+import BaseButton from '~/components/BaseButton.vue'
+import FuncionariosTable from '~/components/FuncionariosTable.vue'
 
 // Middleware de autenticação
 definePageMeta({
@@ -88,6 +95,14 @@ const formatDate = (dateString) => {
 // Função de logout
 const handleLogout = async () => {
   await logout()
+}
+
+// Função para ver detalhes de um funcionário
+const handleVerDetalhesFuncionario = (funcionario) => {
+  console.log('Detalhes do funcionário solicitados:', funcionario)
+  // Aqui você pode implementar a navegação para uma página de detalhes
+  // ou abrir um modal com os detalhes do funcionário
+  alert(`Detalhes do funcionário: ${funcionario.nome}\nCargo: ${funcionario.cargo}\nE-mail: ${funcionario.email || 'Não informado'}`)
 }
 </script>
 
