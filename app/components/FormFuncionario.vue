@@ -19,7 +19,7 @@
         label="Nome"
         placeholder="Digite o nome completo"
         required
-        :disabled="loading"
+        :disabled="isLoadingGlobal"
       >
         <template #iconLeft>
           <UserIcon class="w-5 h-5" />
@@ -33,7 +33,7 @@
         placeholder="Selecione o cargo do funcionário"
         :options="cargoOptions"
         required
-        :disabled="loading"
+        :disabled="isLoadingGlobal"
       >
         <template #iconLeft>
           <BriefcaseIcon class="w-5 h-5" />
@@ -46,7 +46,7 @@
         type="text"
         label="Endereço"
         placeholder="Digite o endereço (opcional)"
-        :disabled="loading"
+        :disabled="isLoadingGlobal"
       >
         <template #iconLeft>
           <MapPinIcon class="w-5 h-5" />
@@ -59,7 +59,7 @@
         type="email"
         label="E-mail"
         placeholder="Digite o e-mail (opcional)"
-        :disabled="loading"
+        :disabled="isLoadingGlobal"
       >
         <template #iconLeft>
           <EnvelopeIcon class="w-5 h-5" />
@@ -73,7 +73,7 @@
         label="Salário"
         placeholder="Digite o salário"
         required
-        :disabled="loading"
+        :disabled="isLoadingGlobal"
       >
         <template #iconLeft>
           <CurrencyDollarIcon class="w-5 h-5" />
@@ -87,13 +87,13 @@
           variant="primary"
           size="lg"
           full-width
-          :loading="loading"
+          :loading="isLoadingGlobal"
         >
           <template #icon-left>
             <CheckIcon v-if="props.isNovo" class="w-5 h-5" />
             <PencilIcon v-else class="w-5 h-5" />
           </template>
-          <span v-if="loading">
+          <span v-if="isLoadingGlobal">
             {{ props.isNovo ? 'Salvando...' : 'Atualizando...' }}
           </span>
           <span v-else>
@@ -107,7 +107,7 @@
           size="lg"
           full-width
           @click="handleCancel"
-          :disabled="loading"
+          :disabled="isLoadingGlobal"
         >
           <template #icon-left>
             <XMarkIcon class="w-5 h-5" />
@@ -148,6 +148,10 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['submit', 'cancel'])
 
+// Usar notificações e funcionários
+const { success, error, validation } = useNotification()
+const { criarFuncionario, loading: funcionariosLoading } = useFuncionarios()
+
 // Debug: Verificar valor da prop
 console.log('FormFuncionario - isNovo:', props.isNovo)
 
@@ -174,8 +178,9 @@ const formData = ref({
   salario: ''
 })
 
-// Estado de loading
+// Estado de loading local + funcionários
 const loading = ref(false)
+const isLoadingGlobal = computed(() => loading.value || funcionariosLoading.value)
 
 // Validação do formulário
 const isFormValid = computed(() => {
@@ -187,7 +192,11 @@ const isFormValid = computed(() => {
 
 // Função para lidar com o submit
 const handleSubmit = async () => {
-  if (!isFormValid.value) return
+  // Validar campos obrigatórios
+  if (!isFormValid.value) {
+    await validation.requiredFields()
+    return
+  }
 
   loading.value = true
   
@@ -203,11 +212,30 @@ const handleSubmit = async () => {
 
     console.log(props.isNovo ? 'Salvando novo funcionário:' : 'Editando funcionário:', dataToSubmit)
 
-    // Emitir evento para componente pai
-    emit('submit', dataToSubmit)
+    if (props.isNovo) {
+      // Criar novo funcionário no Supabase
+      const result = await criarFuncionario(dataToSubmit)
+      
+      if (result.success) {
+        await success('Funcionário cadastrado com sucesso!')
+        
+        // Resetar o formulário para novos dados
+        clearForm()
+        
+        // Emitir evento para o componente pai (se necessário)
+        emit('submit', result.data)
+      } else {
+        await error(result.error || 'Erro ao cadastrar funcionário')
+      }
+    } else {
+      // TODO: Implementar edição
+      emit('submit', dataToSubmit)
+      await success('Funcionário atualizado com sucesso!')
+    }
 
-  } catch (error) {
-    console.error('Erro ao processar formulário:', error)
+  } catch (err) {
+    console.error('Erro ao processar formulário:', err)
+    await error('Erro interno. Tente novamente.')
   } finally {
     loading.value = false
   }

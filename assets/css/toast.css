@@ -1,0 +1,217 @@
+/* Estilos customizados para Vue Toastification */
+/* Sobrescreve os estilos padrão para combinar com nosso design system */
+
+/* Container principal dos toasts */
+.Vue-Toastification__container {
+  z-index: 9999 !important;
+}
+
+/* Estilos base para todos os toasts */
+.Vue-Toastification__toast {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid !important;
+  backdrop-filter: blur(8px) !important;
+  font-family: ui-sans-serif, system-ui, sans-serif !important;
+  min-height: auto !important;
+  padding: 16px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Body do toast */
+.custom-toast-body {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Toast de Sucesso */
+.custom-toast-success {
+  background-color: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+  color: #166534 !important;
+}
+
+.custom-toast-success .Vue-Toastification__progress-bar {
+  background-color: #22c55e !important;
+}
+
+.custom-toast-success .Vue-Toastification__close-button {
+  color: #16a34a !important;
+}
+
+.custom-toast-success .Vue-Toastification__close-button:hover {
+  color: #166534 !important;
+}
+
+.custom-toast-success .Vue-Toastification__icon {
+  color: #22c55e !important;
+}
+
+/* Toast de Erro */
+.custom-toast-error {
+  background-color: #fef2f2 !important;
+  border-color: #fecaca !important;
+  color: #991b1b !important;
+}
+
+.custom-toast-error .Vue-Toastification__progress-bar {
+  background-color: #ef4444 !important;
+}
+
+.custom-toast-error .Vue-Toastification__close-button {
+  color: #dc2626 !important;
+}
+
+.custom-toast-error .Vue-Toastification__close-button:hover {
+  color: #991b1b !important;
+}
+
+.custom-toast-error .Vue-Toastification__icon {
+  color: #ef4444 !important;
+}
+
+/* Toast de Info */
+.custom-toast-info {
+  background-color: #fef3e2 !important;
+  border-color: #fed7aa !important;
+  color: #9a3412 !important;
+}
+
+.custom-toast-info .Vue-Toastification__progress-bar {
+  background-color: #f97316 !important;
+}
+
+.custom-toast-info .Vue-Toastification__close-button {
+  color: #ea580c !important;
+}
+
+.custom-toast-info .Vue-Toastification__close-button:hover {
+  color: #9a3412 !important;
+}
+
+.custom-toast-info .Vue-Toastification__icon {
+  color: #f97316 !important;
+}
+
+/* Toast de Warning */
+.custom-toast-warning {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+  color: #92400e !important;
+}
+
+.custom-toast-warning .Vue-Toastification__progress-bar {
+  background-color: #f59e0b !important;
+}
+
+.custom-toast-warning .Vue-Toastification__close-button {
+  color: #d97706 !important;
+}
+
+.custom-toast-warning .Vue-Toastification__close-button:hover {
+  color: #92400e !important;
+}
+
+.custom-toast-warning .Vue-Toastification__icon {
+  color: #f59e0b !important;
+}
+
+/* Botão de fechar customizado */
+.Vue-Toastification__close-button {
+  opacity: 0.7 !important;
+  transition: opacity 0.2s ease !important;
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.Vue-Toastification__close-button:hover {
+  opacity: 1 !important;
+}
+
+/* Animações customizadas */
+.Vue-Toastification__bounce-enter-active {
+  animation: bounce-in 0.5s ease-out;
+}
+
+.Vue-Toastification__bounce-leave-active {
+  animation: bounce-out 0.3s ease-in;
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3) translateY(-100px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-out {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.3) translateY(-100px);
+    opacity: 0;
+  }
+}
+
+/* Progress bar customizada */
+.Vue-Toastification__progress-bar {
+  height: 3px !important;
+  border-radius: 0 0 8px 8px !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .Vue-Toastification__container {
+    padding: 16px !important;
+  }
+  
+  .Vue-Toastification__toast {
+    margin-bottom: 12px !important;
+    min-width: auto !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+}
+
+/* Dark mode support (se necessário no futuro) */
+@media (prefers-color-scheme: dark) {
+  .custom-toast-success {
+    background-color: rgba(20, 83, 45, 0.9) !important;
+    border-color: #15803d !important;
+    color: #dcfce7 !important;
+  }
+  
+  .custom-toast-error {
+    background-color: rgba(153, 27, 27, 0.9) !important;
+    border-color: #b91c1c !important;
+    color: #fecaca !important;
+  }
+  
+  .custom-toast-info {
+    background-color: rgba(154, 52, 18, 0.9) !important;
+    border-color: #c2410c !important;
+    color: #fed7aa !important;
+  }
+  
+  .custom-toast-warning {
+    background-color: rgba(146, 64, 14, 0.9) !important;
+    border-color: #d97706 !important;
+    color: #fde68a !important;
+  }
+}

@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js'
+import { useNotification } from '~/composables/useNotification'
 
 interface LoginCredentials {
   email: string
@@ -15,6 +16,7 @@ interface AuthState {
 export const useAuth = () => {
   const supabase = useSupabaseClient()
   const router = useRouter()
+  const { auth } = useNotification()
 
   // Estado global da autenticação
   const authState = useState<AuthState>('auth.state', () => ({

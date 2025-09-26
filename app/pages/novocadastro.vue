@@ -43,9 +43,8 @@ const router = useRouter()
 // Função para lidar com o submit do formulário
 const handleSubmitFuncionario = (dadosFuncionario) => {
   console.log('Dados do funcionário recebidos:', dadosFuncionario)
-  // Aqui você implementará a lógica para salvar no banco
-  // Por enquanto, apenas mostra os dados no console
-  alert(`Funcionário cadastrado!\nNome: ${dadosFuncionario.nome}\nCargo: ${dadosFuncionario.cargo}\nSalário: R$ ${dadosFuncionario.salario}`)
+  // O FormFuncionario já lida com a persistência no Supabase
+  // Aqui podemos apenas fazer log ou outras ações se necessário
 }
 
 // Função para lidar com o cancelamento

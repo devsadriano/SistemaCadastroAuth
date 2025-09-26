@@ -98,6 +98,100 @@ export const useFuncionarios = () => {
     return funcionariosState.value.funcionarios.find(f => f.id === id)
   }
 
+  // Função para criar um novo funcionário
+  const criarFuncionario = async (dadosFuncionario: Omit<Funcionario, 'id' | 'created_at'>): Promise<{ success: boolean; error?: string; data?: Funcionario }> => {
+    try {
+      setLoading(true)
+      clearError()
+
+      console.log('Criando novo funcionário:', dadosFuncionario)
+
+      // Validações básicas
+      if (!dadosFuncionario.nome?.trim()) {
+        const errorMsg = 'Nome é obrigatório'
+        setError(errorMsg)
+        return { success: false, error: errorMsg }
+      }
+
+      if (!dadosFuncionario.cargo?.trim()) {
+        const errorMsg = 'Cargo é obrigatório'
+        setError(errorMsg)
+        return { success: false, error: errorMsg }
+      }
+
+      if (!dadosFuncionario.salario || dadosFuncionario.salario <= 0) {
+        const errorMsg = 'Salário deve ser maior que zero'
+        setError(errorMsg)
+        return { success: false, error: errorMsg }
+      }
+
+      // Validar e-mail se fornecido
+      if (dadosFuncionario.email && dadosFuncionario.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(dadosFuncionario.email)) {
+          const errorMsg = 'Formato de e-mail inválido'
+          setError(errorMsg)
+          return { success: false, error: errorMsg }
+        }
+      }
+
+      // Inserir no Supabase
+      const { data, error } = await supabase
+        .from('funcionarios')
+        .insert({
+          nome: dadosFuncionario.nome.trim(),
+          cargo: dadosFuncionario.cargo.trim(),
+          endereco: dadosFuncionario.endereco?.trim() || null,
+          email: dadosFuncionario.email?.trim() || null,
+          salario: dadosFuncionario.salario
+        } as any)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao criar funcionário:', error)
+        
+        let errorMessage = 'Erro ao criar funcionário'
+        
+        // Personalizar mensagens de erro
+        switch (error.code) {
+          case '23505':
+            errorMessage = 'Já existe um funcionário com estes dados'
+            break
+          case '42501':
+            errorMessage = 'Sem permissão para criar funcionário'
+            break
+          case '23514':
+            errorMessage = 'Dados inválidos fornecidos'
+            break
+          default:
+            errorMessage = error.message || 'Erro desconhecido ao criar funcionário'
+        }
+        
+        setError(errorMessage)
+        return { success: false, error: errorMessage }
+      }
+
+      if (data) {
+        // Adicionar o novo funcionário ao estado local
+        funcionariosState.value.funcionarios.unshift(data as Funcionario)
+        console.log('Funcionário criado com sucesso:', data)
+        return { success: true, data: data as Funcionario }
+      }
+
+      return { success: false, error: 'Nenhum dado retornado após criação' }
+
+    } catch (err: any) {
+      console.error('Erro interno ao criar funcionário:', err)
+      const errorMessage = err.message || 'Erro interno do servidor'
+      setError(errorMessage)
+      return { success: false, error: errorMessage }
+      
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Função para obter total de funcionários
   const totalFuncionarios = computed(() => funcionariosState.value.funcionarios.length)
 
@@ -111,6 +205,7 @@ export const useFuncionarios = () => {
     // Ações
     buscarFuncionarios,
     obterFuncionario,
+    criarFuncionario,
     clearError,
     setError,
   }
