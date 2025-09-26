@@ -1,50 +1,29 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-4xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-text-primary mb-2">
-          Novo Cadastro
+          Novo Funcionário
         </h1>
         <p class="text-text-secondary">
-          Área para cadastrar novos usuários ou informações
+          Cadastre um novo funcionário no sistema
         </p>
       </div>
 
-      <!-- Content Card -->
-      <div class="bg-surface-primary rounded-xl shadow-card border border-borderColor-surface p-8">
-        <div class="text-center py-12">
-          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserPlusIcon class="w-8 h-8 text-primary-500" />
-          </div>
-          
-          <h2 class="text-xl font-semibold text-text-primary mb-2">
-            Funcionalidade em Desenvolvimento
-          </h2>
-          
-          <p class="text-text-secondary mb-8">
-            Esta página estará disponível em breve com funcionalidades de cadastro.
-          </p>
-
-          <div class="flex flex-wrap gap-4 justify-center">
-            <BaseButton
-              variant="outline"
-              @click="$router.push('/')"
-            >
-              <template #icon-left>
-                <ArrowLeftIcon class="w-5 h-5" />
-              </template>
-              Voltar ao Início
-            </BaseButton>
-          </div>
-        </div>
-      </div>
+      <!-- Formulário de Funcionário -->
+      <FormFuncionario
+        :is-novo="true"
+        @submit="handleSubmitFuncionario"
+        @cancel="handleCancelFuncionario"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { UserPlusIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
+// Imports explícitos dos componentes
+import FormFuncionario from '~/components/FormFuncionario.vue'
 
 // Middleware de autenticação
 definePageMeta({
@@ -54,9 +33,26 @@ definePageMeta({
 
 // Meta tags específicas da página
 useSeoMeta({
-  title: 'Novo Cadastro',
-  description: 'Página de cadastro de novos usuários'
+  title: 'Novo Funcionário',
+  description: 'Página de cadastro de novos funcionários'
 })
+
+// Router para navegação
+const router = useRouter()
+
+// Função para lidar com o submit do formulário
+const handleSubmitFuncionario = (dadosFuncionario) => {
+  console.log('Dados do funcionário recebidos:', dadosFuncionario)
+  // Aqui você implementará a lógica para salvar no banco
+  // Por enquanto, apenas mostra os dados no console
+  alert(`Funcionário cadastrado!\nNome: ${dadosFuncionario.nome}\nCargo: ${dadosFuncionario.cargo}\nSalário: R$ ${dadosFuncionario.salario}`)
+}
+
+// Função para lidar com o cancelamento
+const handleCancelFuncionario = () => {
+  console.log('Cadastro cancelado')
+  router.push('/')
+}
 </script>
 
 <style scoped>
