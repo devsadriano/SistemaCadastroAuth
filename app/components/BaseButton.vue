@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 interface BaseButtonProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'warning' | 'success'
   size?: 'sm' | 'md' | 'lg'
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
@@ -81,6 +81,14 @@ const buttonClasses = computed(() => [
     // Danger
     'bg-error-500 text-text-inverse hover:bg-error-600 hover:shadow-md focus:ring-error-500 shadow-md': 
       props.variant === 'danger' && !props.disabled && !props.loading,
+    
+    // Warning
+    'bg-warning-500 text-text-inverse hover:bg-warning-600 hover:shadow-md focus:ring-warning-500 shadow-md': 
+      props.variant === 'warning' && !props.disabled && !props.loading,
+    
+    // Success
+    'bg-success-500 text-text-inverse hover:bg-success-600 hover:shadow-md focus:ring-success-500 shadow-md': 
+      props.variant === 'success' && !props.disabled && !props.loading,
   },
   
   // Estados

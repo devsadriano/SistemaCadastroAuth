@@ -117,16 +117,30 @@
               {{ funcionario.email || 'Não informado' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <BaseButton
-                variant="ghost"
-                size="sm"
-                @click="handleVerDetalhes(funcionario)"
-              >
-                <template #icon-left>
-                  <EyeIcon class="w-4 h-4" />
-                </template>
-                Ver
-              </BaseButton>
+              <div class="flex items-center justify-end space-x-2">
+                <BaseButton
+                  variant="ghost"
+                  size="sm"
+                  @click="handleEditarFuncionario(funcionario)"
+                >
+                  <template #icon-left>
+                    <PencilIcon class="w-4 h-4" />
+                  </template>
+                  <span class="ml-2">Editar</span>
+                </BaseButton>
+                
+                <BaseButton
+                  variant="ghost"
+                  size="sm"
+                  @click="handleDeletarFuncionario(funcionario)"
+                  class="text-error-500 hover:text-error-600 hover:bg-error-50"
+                >
+                  <template #icon-left>
+                    <TrashIcon class="w-4 h-4" />
+                  </template>
+                  <span class="ml-2">Deletar</span>
+                </BaseButton>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -140,6 +154,21 @@
         <span>Última atualização: {{ formatarDataAtualização() }}</span>
       </div>
     </div>
+
+    <!-- Modal de Confirmação para Deletar -->
+    <ConfirmModal
+      :is-open="deleteModal.isOpen"
+      :title="deleteModal.title"
+      :message="deleteModal.message"
+      :details="deleteModal.details"
+      type="danger"
+      confirm-text="Deletar"
+      cancel-text="Cancelar"
+      loading-text="Deletando..."
+      :loading="deleteModal.loading"
+      @confirm="confirmarDelecao"
+      @cancel="cancelarDelecao"
+    />
   </div>
 </template>
 
@@ -150,17 +179,33 @@ import {
   UserGroupIcon,
   ArrowPathIcon,
   ExclamationCircleIcon,
-  EyeIcon,
+  PencilIcon,
+  TrashIcon,
 } from '@heroicons/vue/24/outline'
 
 // Imports explícitos dos componentes
 import BaseButton from '~/components/BaseButton.vue'
+import ConfirmModal from '~/components/ConfirmModal.vue'
 
 // Composable de funcionários
-const { funcionarios, loading, error, totalFuncionarios, buscarFuncionarios, clearError } = useFuncionarios()
+const { funcionarios, loading, error, totalFuncionarios, buscarFuncionarios, deletarFuncionario, clearError } = useFuncionarios()
 
-// Emits
-const emit = defineEmits(['ver-detalhes'])
+// Composable de notificações
+const { success, error: notificationError } = useNotification()
+
+// Router para navegação
+const router = useRouter()
+
+// Estado do modal de deletar
+const deleteModal = ref({
+  isOpen: false,
+  loading: false,
+  title: '',
+  message: '',
+  details: '',
+  funcionarioId: null,
+  funcionarioNome: ''
+})
 
 // Função para recarregar dados
 const handleRecarregar = async () => {
@@ -173,10 +218,63 @@ const handleRecarregar = async () => {
   }
 }
 
-// Função para ver detalhes de um funcionário
-const handleVerDetalhes = (funcionario) => {
-  emit('ver-detalhes', funcionario)
-  console.log('Ver detalhes do funcionário:', funcionario.nome)
+// Função para editar funcionário
+const handleEditarFuncionario = (funcionario) => {
+  console.log('Editando funcionário:', funcionario.nome)
+  router.push(`/funcionarios/${funcionario.id}`)
+}
+
+// Função para iniciar processo de deletar funcionário
+const handleDeletarFuncionario = (funcionario) => {
+  console.log('Solicitando deleção do funcionário:', funcionario.nome)
+  
+  deleteModal.value = {
+    isOpen: true,
+    loading: false,
+    title: 'Deletar Funcionário',
+    message: `Tem certeza que deseja deletar o funcionário "${funcionario.nome}"?`,
+    details: `Esta ação não pode ser desfeita. Todos os dados do funcionário serão removidos permanentemente do sistema.`,
+    funcionarioId: funcionario.id,
+    funcionarioNome: funcionario.nome
+  }
+}
+
+// Função para confirmar deleção
+const confirmarDelecao = async () => {
+  if (!deleteModal.value.funcionarioId) return
+  
+  deleteModal.value.loading = true
+  
+  try {
+    console.log('Confirmando deleção do funcionário ID:', deleteModal.value.funcionarioId)
+    
+    const result = await deletarFuncionario(deleteModal.value.funcionarioId)
+    
+    if (result.success) {
+      await success(`Funcionário "${deleteModal.value.funcionarioNome}" deletado com sucesso!`)
+      cancelarDelecao()
+    } else {
+      await notificationError(result.error || 'Erro ao deletar funcionário')
+      deleteModal.value.loading = false
+    }
+  } catch (err) {
+    console.error('Erro ao deletar funcionário:', err)
+    await notificationError('Erro interno. Tente novamente.')
+    deleteModal.value.loading = false
+  }
+}
+
+// Função para cancelar deleção
+const cancelarDelecao = () => {
+  deleteModal.value = {
+    isOpen: false,
+    loading: false,
+    title: '',
+    message: '',
+    details: '',
+    funcionarioId: null,
+    funcionarioNome: ''
+  }
 }
 
 // Função para formatar data de atualização

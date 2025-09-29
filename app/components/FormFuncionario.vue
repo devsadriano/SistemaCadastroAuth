@@ -142,6 +142,10 @@ const props = defineProps({
   isNovo: {
     type: Boolean,
     default: true
+  },
+  funcionarioData: {
+    type: Object,
+    default: null
   }
 })
 
@@ -150,7 +154,7 @@ const emit = defineEmits(['submit', 'cancel'])
 
 // Usar notificações e funcionários
 const { success, error, validation } = useNotification()
-const { criarFuncionario, loading: funcionariosLoading } = useFuncionarios()
+const { criarFuncionario, editarFuncionario, loading: funcionariosLoading } = useFuncionarios()
 
 // Debug: Verificar valor da prop
 console.log('FormFuncionario - isNovo:', props.isNovo)
@@ -177,6 +181,29 @@ const formData = ref({
   email: '',
   salario: ''
 })
+
+// Preencher formulário com dados existentes se não for novo
+const preencherFormulario = () => {
+  if (!props.isNovo && props.funcionarioData) {
+    formData.value = {
+      nome: props.funcionarioData.nome || '',
+      cargo: props.funcionarioData.cargo || '',
+      endereco: props.funcionarioData.endereco || '',
+      email: props.funcionarioData.email || '',
+      salario: props.funcionarioData.salario?.toString() || ''
+    }
+    console.log('Formulário preenchido com dados:', props.funcionarioData)
+  }
+}
+
+// Preencher formulário quando o componente montar ou dados mudarem
+onMounted(() => {
+  preencherFormulario()
+})
+
+watch(() => props.funcionarioData, () => {
+  preencherFormulario()
+}, { deep: true })
 
 // Estado de loading local + funcionários
 const loading = ref(false)
@@ -228,9 +255,22 @@ const handleSubmit = async () => {
         await error(result.error || 'Erro ao cadastrar funcionário')
       }
     } else {
-      // TODO: Implementar edição
-      emit('submit', dataToSubmit)
-      await success('Funcionário atualizado com sucesso!')
+      // Editar funcionário existente no Supabase
+      if (!props.funcionarioData?.id) {
+        await error('ID do funcionário não encontrado')
+        return
+      }
+
+      const result = await editarFuncionario(props.funcionarioData.id, dataToSubmit)
+      
+      if (result.success) {
+        await success('Funcionário atualizado com sucesso!')
+        
+        // Emitir evento para o componente pai
+        emit('submit', result.data)
+      } else {
+        await error(result.error || 'Erro ao atualizar funcionário')
+      }
     }
 
   } catch (err) {
