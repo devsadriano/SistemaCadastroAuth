@@ -102,6 +102,7 @@ npm run build
 - **Tailwind CSS**: Framework CSS utilitário
 - **TypeScript**: Tipagem estática para JavaScript
 - **Heroicons**: Biblioteca de ícones
+- **Vercel**: publicação
 
 ## 🔐 Segurança
 
