@@ -11,27 +11,6 @@
         </p>
       </div>
 
-      <!-- User Info Card -->
-      <div v-if="user" class="bg-surface-primary rounded-xl shadow-card border border-borderColor-surface p-6 mb-8">
-        <h2 class="text-2xl font-semibold text-text-primary mb-4">
-          Informações do Usuário
-        </h2>
-        <div class="space-y-2">
-          <p class="text-text-secondary">
-            <span class="font-medium">E-mail:</span>
-            {{ user.email }}
-          </p>
-          <p class="text-text-secondary">
-            <span class="font-medium">ID:</span>
-            {{ user.id }}
-          </p>
-          <p class="text-text-secondary">
-            <span class="font-medium">Último acesso:</span>
-            {{ formatDate(user.last_sign_in_at) }}
-          </p>
-        </div>
-      </div>
-
       <!-- Action Buttons -->
       <div class="flex flex-wrap gap-4 justify-center mb-8">
         <BaseButton
